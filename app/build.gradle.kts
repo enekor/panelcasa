@@ -25,14 +25,12 @@ android {
     val store = file("/root/credenciales/app-key.jks")
     val releaseSigning = if (signingProps.isFile && store.isFile) {
         val p = Properties().apply { signingProps.inputStream().use { load(it) } }
-        run {
-            signingConfigs.create("release") {
-                storeFile = store
-                storePassword = p.getProperty("storePassword")
-                keyAlias = p.getProperty("keyAlias")
-                keyPassword = p.getProperty("keyPassword")
-            }
-        } else null
+        signingConfigs.create("release") {
+            storeFile = store
+            storePassword = p.getProperty("storePassword")
+            keyAlias = p.getProperty("keyAlias")
+            keyPassword = p.getProperty("keyPassword")
+        }
     } else null
 
     buildTypes {
