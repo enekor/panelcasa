@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Panel (datos de ejemplo)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="panel" class="panel">
+  <section class="col col-meteo" aria-label="Tiempo">
+    <div class="clock">
+      <div id="clock-time" class="clock-time">--:--</div>
+      <div id="clock-date" class="clock-date"></div>
+    </div>
+    <div class="now">
+      <div id="now-icon" class="now-icon"></div>
+      <div id="now-temp" class="now-temp">--°</div>
+    </div>
+    <div id="hours" class="hours"></div>
+    <div id="days" class="days"></div>
+    <div id="meteo-msg" class="msg" hidden></div>
+  </section>
+  <section class="col col-renfe" aria-label="Trenes">
+    <header class="renfe-head">
+      <div id="station" class="station">Cercanías</div>
+      <div id="stale" class="stale" hidden></div>
+    </header>
+    <div id="blocks" class="blocks"></div>
+    <div id="renfe-msg" class="msg" hidden></div>
+    <div id="alerts" class="alerts" hidden></div>
+    <footer class="credits">Datos: Renfe · MET Norway</footer>
+  </section>
+</main>
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script src="mock-data.js"></script>
+</body>
+</html>

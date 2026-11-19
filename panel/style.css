@@ -1,0 +1,138 @@
+/* Panel para WebView de Android 7 (Chrome 80 o superior).
+   Sin animaciones, transiciones, sombras difuminadas ni filtros: colores planos y fuente del sistema. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #0f1317;
+  color: #e8ecef;
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[hidden] { display: none !important; }
+
+.panel {
+  display: grid;
+  grid-template-columns: 44fr 56fr;
+  height: 100vh;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 20px 24px;
+}
+
+.col-meteo { background: #141a1f; border-right: 2px solid #0b0e11; }
+
+/* Reloj */
+.clock-time { font-size: 104px; font-weight: 300; line-height: 1; letter-spacing: -2px; }
+.clock-date { font-size: 24px; color: #a9b4bd; margin-top: 6px; }
+
+/* Ahora */
+.now { display: flex; align-items: center; margin: 18px 0 14px; }
+.now-icon { width: 96px; height: 96px; flex: none; }
+.now-icon svg, .h-icon svg, .d-icon svg { width: 100%; height: 100%; display: block; }
+.now-temp { font-size: 80px; font-weight: 300; margin-left: 16px; line-height: 1; }
+
+/* Horas */
+.hours {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  padding: 10px 0;
+  border-top: 2px solid #232b32;
+  border-bottom: 2px solid #232b32;
+}
+.hour { text-align: center; min-width: 0; }
+.h-time { font-size: 18px; color: #a9b4bd; }
+.h-icon { width: 44px; height: 44px; margin: 4px auto; }
+.h-temp { font-size: 22px; }
+.h-rain { font-size: 15px; color: #6fb3ff; min-height: 18px; }
+
+/* Días */
+.days { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-height: 0; padding-top: 6px; }
+.day { display: grid; grid-template-columns: 1fr 44px 70px 70px 64px; align-items: center; gap: 8px; }
+.d-name { font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
+.d-icon { width: 40px; height: 40px; }
+.d-max { font-size: 24px; text-align: right; }
+.d-min { font-size: 24px; text-align: right; color: #8a96a0; }
+.d-rain { font-size: 16px; text-align: right; color: #6fb3ff; }
+
+/* Renfe */
+.renfe-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.station { font-size: 30px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.stale { font-size: 18px; color: #1a1300; background: #f2b632; padding: 3px 10px; border-radius: 4px; white-space: nowrap; }
+
+.blocks { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.block { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.block + .block { border-top: 2px solid #232b32; margin-top: 8px; padding-top: 8px; }
+.b-title { font-size: 21px; color: #a9b4bd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.b-rows { display: flex; flex-direction: column; flex: 1; justify-content: space-around; min-height: 0; }
+
+.train { display: grid; grid-template-columns: 150px 70px 1fr; align-items: center; gap: 14px; min-height: 0; }
+.t-min { font-size: 56px; font-weight: 500; line-height: 1; text-align: right; white-space: nowrap; }
+.t-min small { font-size: 24px; font-weight: 400; margin-left: 4px; color: #a9b4bd; }
+.t-min .now-word { font-size: 0.62em; }
+.t-line { font-size: 22px; font-weight: 700; text-align: center; border-radius: 6px; padding: 4px 0; }
+.t-info { min-width: 0; }
+.t-dest { font-size: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-state { font-size: 18px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ok { color: #57c785; }
+.late { color: #f2b632; }
+.verylate { color: #ff6b5e; }
+.theory { color: #8a96a0; }
+.train.canceled .t-min, .train.canceled .t-dest { color: #6c757d; text-decoration: line-through; }
+.train.canceled .t-state { color: #ff6b5e; }
+.train.empty .t-dest { color: #6c757d; }
+
+.alerts {
+  font-size: 18px;
+  line-height: 1.3;
+  color: #1a1300;
+  background: #f2b632;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.msg { font-size: 22px; color: #a9b4bd; padding: 16px 0; }
+.credits { font-size: 14px; color: #6c7781; margin-top: 8px; text-align: right; }
+
+/* Dos tercios del ancho (columna de casa visible) o pantallas estrechas */
+@media (max-width: 1000px) {
+  .col { padding: 14px 16px; }
+  .clock-time { font-size: 76px; }
+  .clock-date { font-size: 19px; }
+  .now-icon { width: 70px; height: 70px; }
+  .now-temp { font-size: 58px; }
+  .h-time { font-size: 15px; }
+  .h-icon { width: 34px; height: 34px; }
+  .h-temp { font-size: 18px; }
+  .h-rain { font-size: 13px; }
+  .day { grid-template-columns: 1fr 32px 50px 50px 0; gap: 6px; }
+  .d-name, .d-max, .d-min { font-size: 18px; }
+  .d-icon { width: 32px; height: 32px; }
+  .d-rain { display: none; }
+  .station { font-size: 24px; }
+  .stale { font-size: 15px; }
+  .b-title { font-size: 17px; }
+  .train { grid-template-columns: 104px 54px 1fr; gap: 10px; }
+  .t-min { font-size: 40px; }
+  .t-min small { font-size: 18px; }
+  .t-line { font-size: 17px; }
+  .t-dest { font-size: 20px; }
+  .t-state { font-size: 15px; }
+  .alerts { font-size: 15px; }
+}
