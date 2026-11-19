@@ -45,13 +45,19 @@ Pasos manuales en la ASUS ZenPad 10 (Android 7.0). Los nombres de menú pueden v
 2. Escribir el nombre de la estación y tocarla. El tiempo usa las coordenadas de esa estación.
 3. Rueda dentada (abajo en el panel lateral) → «Apps del panel lateral» para fijar apps. Por defecto se fijan los Ajustes de Android.
 
-## 5. Volver al launcher original
+## 5. Botón de bloqueo
+
+El candado del panel lateral apaga y bloquea la pantalla. La primera vez Android pide activar «Panel de casa» como administrador del dispositivo: solo con el permiso de bloquear la pantalla, sin ningún otro. Pulsar **Activar**. Después, cada toque bloquea.
+
+Para desinstalar la app hay que quitar antes ese permiso: rueda dentada → «Quitar el permiso de bloqueo» (o Ajustes de Android → Seguridad → Administradores de dispositivos).
+
+## 6. Volver al launcher original
 
 - Desde la app: rueda dentada → «Cambiar la pantalla de inicio».
 - Desde Android: Ajustes → Aplicaciones → rueda dentada → Aplicaciones predeterminadas → Aplicación de inicio.
 - Si la app no arranca: Ajustes → Aplicaciones → Panel de casa → «Borrar valores predeterminados», y pulsar inicio.
 
-## 6. Recoger métricas
+## 7. Recoger métricas
 
 ### Sin cable
 
@@ -71,6 +77,6 @@ adb pull /sdcard/Android/data/com.n3k0chan.panelcasa/files/ .           # inform
 
 Para la media de CPU de 5 minutos: `adb shell top -d 10 -n 30 | findstr panelcasa` y promediar la columna de CPU.
 
-## 7. Batería
+## 8. Batería
 
 La tablet va a estar siempre enchufada. Para no tenerla al 100 % de forma continua, se recomienda un enchufe con temporizador que corte la carga varias horas al día (por ejemplo, cargar de 7:00 a 9:00 y de 19:00 a 21:00). La app no puede limitar la carga.

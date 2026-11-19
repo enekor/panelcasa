@@ -25,6 +25,11 @@
   - Memoria al inicio, máxima y cada hora, y CPU media (total y últimos 10 min), para la prueba de 24 horas sin adb.
 - **APK de publicación firmado** con `/root/credenciales/app-key.jks` (SHA-256 `DF:71:94:E4:…:04:43`). R8 conserva los 18 serializadores (comprobado en `mapping.txt`) y el APK funcionó en un móvil con Android 17.
 
+## Cambios tras la primera prueba en la tablet (20/11/2026)
+
+- **Met.no fallaba en la tablet** con «Trust anchor for certification path not found»: Android 7.0 no corta la cadena firmada en cruzado en la raíz HARICA 2021 empaquetada. Arreglado con `BundledRootsTrustManager` (validación PKIX de respaldo solo contra las raíces empaquetadas; ver `docs/entorno.md`). 7 pruebas con la cadena real y prueba en vivo (`./gradlew :net:liveTls`) que reproduce el fallo y su solución.
+- **Botón de bloqueo** (candado) en el panel lateral: administrador del dispositivo con una sola política (`force-lock`); se activa la primera vez que se pulsa y se puede retirar desde ajustes. No añade ningún `uses-permission`.
+
 ## Fase 0 — Reconocimiento
 
 Hecho:

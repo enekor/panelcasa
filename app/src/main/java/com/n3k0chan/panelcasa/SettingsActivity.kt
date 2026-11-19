@@ -149,6 +149,14 @@ class SettingsActivity : Activity() {
         c.addView(Ui.row(this, "Cambiar la pantalla de inicio", "Para volver al launcher original de la tablet") {
             open(Intent(Settings.ACTION_HOME_SETTINGS))
         })
+        if (ScreenLock.isEnabled(this)) {
+            c.addView(Ui.row(this, "Quitar el permiso de bloqueo", "Necesario antes de desinstalar la app. El candado lo volverá a pedir si se pulsa.") {
+                ScreenLock.disable(this)
+                Toast.makeText(this, "Permiso de bloqueo retirado", Toast.LENGTH_SHORT).show()
+                content.removeAllViews()
+                build()
+            })
+        }
         c.addView(Ui.text(this, "Datos: Renfe (CC BY 4.0) · MET Norway (CC BY 4.0) · Versión ${versionName()}", 14f).apply {
             setPadding(0, Ui.dp(this@SettingsActivity, 24), 0, 0)
         })

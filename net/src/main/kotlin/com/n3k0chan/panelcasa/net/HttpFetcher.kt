@@ -40,6 +40,8 @@ class HttpFetcher(
     private val userAgent: String,
     private val connectTimeoutMs: Int = 15_000,
     private val readTimeoutMs: Int = 30_000,
+    /** Si se indica, se usa en las conexiones HTTPS (ver [BundledRootsTrustManager]). */
+    private val sslSocketFactory: javax.net.ssl.SSLSocketFactory? = null,
 ) : Fetcher {
 
     /** GET en memoria. Pensado para respuestas pequeñas (tiempo real, meteo). */
@@ -101,6 +103,7 @@ class HttpFetcher(
 
     private fun open(url: String, etag: String?, lastModified: String?): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
+        if (sslSocketFactory != null && conn is javax.net.ssl.HttpsURLConnection) conn.sslSocketFactory = sslSocketFactory
         conn.connectTimeout = connectTimeoutMs
         conn.readTimeout = readTimeoutMs
         conn.instanceFollowRedirects = true

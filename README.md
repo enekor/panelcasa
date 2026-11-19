@@ -50,12 +50,14 @@ Sin adb y resto de pasos (pantalla de inicio, ASUS, métricas): [`docs/tablet.md
 - **Cambiar de estación:** rueda dentada (abajo en el panel lateral) → Estación de Cercanías. Usa el horario ya descargado, sin red.
 - **Fijar apps en el panel lateral:** rueda dentada → Apps del panel lateral; marcar y ordenar con ▲ ▼. «Todas» abre la lista completa.
 - **Presentación de los trenes:** automática (por sentidos en estaciones de paso, lista única en nudos y cabeceras), o forzada en ajustes.
+- **Bloquear la tablet:** candado del panel lateral. La primera vez pide activar el permiso de bloqueo (administrador del dispositivo, solo «bloquear pantalla»); para desinstalar, quitarlo antes en ajustes.
 - **Pantalla de noche:** rueda dentada → Pantalla. Oscurece con brillo mínimo y se ilumina 2 minutos al tocar.
 - **Volver al launcher original:** rueda dentada → Cambiar la pantalla de inicio.
 - **Diagnóstico:** rueda dentada → Diagnóstico → Exportar informe.
 
 ## Mantenimiento
 
+- **Validación TLS en Android 7.0:** `net/.../BundledRootsTrustManager.kt` repite la validación contra las raíces empaquetadas si la del sistema falla (Android 7.0 no corta las cadenas firmadas en cruzado). Comprobación en vivo: `./gradlew :net:liveTls -Paosp=/root/panelcasa-data/aosp-ca -Proots=app/src/main/res/raw`.
 - **Raíces de certificados:** si Renfe o Met.no cambian de autoridad y la tablet deja de conectar (el diagnóstico muestra «ERROR DE CERTIFICADO»), añadir la nueva raíz en `app/src/main/res/raw/` y en `app/src/main/res/xml/network_security_config.xml`, y publicar un APK nuevo. Comprobación previa en la JVM con el almacén de Android 7.0: ver `docs/entorno.md`.
 - **Identificación ante MET Norway:** constante `PanelApp.USER_AGENT`.
 - **Redes de Cercanías nuevas:** mapa de prefijos en `renfe/.../Model.kt` (`Networks`).

@@ -13,13 +13,14 @@ import android.widget.TextView
 
 /**
  * Panel lateral izquierdo, nativo para que funcione aunque el WebView falle:
- * apps fijadas arriba (con desplazamiento si no caben) y, al pie, «Todas» y la rueda de ajustes.
+ * apps fijadas arriba (con desplazamiento si no caben) y, al pie, el candado de bloqueo, «Todas» y la rueda de ajustes.
  */
 class Sidebar(
     context: Context,
     private val onApp: (String) -> Unit,
     private val onAllApps: () -> Unit,
     private val onSettings: () -> Unit,
+    private val onLock: () -> Unit,
 ) : LinearLayout(context) {
     private val list = LinearLayout(context).apply { orientation = VERTICAL }
 
@@ -34,6 +35,7 @@ class Sidebar(
         }
         addView(scroll, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(Ui.divider(context))
+        addView(item(context.getString(R.string.lock), null, R.drawable.ic_lock, "lock") { onLock() })
         addView(item(context.getString(R.string.all_apps_short), null, R.drawable.ic_apps, "all-apps") { onAllApps() })
         addView(item(context.getString(R.string.settings), null, R.drawable.ic_settings, "settings") { onSettings() })
     }

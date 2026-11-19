@@ -71,6 +71,25 @@ class VersionGateLayoutTest {
 
     @Test
     @Config(sdk = [24])
+    fun lockButtonAsksForPermissionFirstThenLocks() {
+        val a = launch()
+        shadowOf(a).nextStartedActivity // buscador de estaciones del primer arranque
+        val lock = a.window.decorView.findViewWithTag<View>("lock")
+        assertNotNull("Candado en el panel lateral", lock)
+
+        lock.performClick()
+        val ask = shadowOf(a).nextStartedActivity
+        assertEquals(android.app.admin.DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN, ask.action)
+
+        val dpm = a.getSystemService(android.content.Context.DEVICE_POLICY_SERVICE) as android.app.admin.DevicePolicyManager
+        shadowOf(dpm).setActiveAdmin(ScreenLock.component(a))
+        lock.performClick()
+        assertNull("Con el permiso concedido bloquea sin abrir nada", shadowOf(a).nextStartedActivity)
+        assertTrue(ScreenLock.isEnabled(a))
+    }
+
+    @Test
+    @Config(sdk = [24])
     fun backButtonDoesNotCloseLauncher() {
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         @Suppress("DEPRECATION")

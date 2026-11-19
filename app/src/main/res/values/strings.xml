@@ -8,4 +8,6 @@
     <string name="diagnostics">Diagnóstico</string>
     <string name="all_apps_short">Todas</string>
     <string name="search_hint">Escribe el nombre de la estación</string>
+    <string name="lock">Bloquear</string>
+    <string name="lock_admin_description">Permite que el botón del candado del panel lateral bloquee la pantalla. No da ningún otro permiso.</string>
 </resources>

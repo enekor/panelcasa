@@ -72,6 +72,7 @@ class MainActivity : Activity() {
             onApp = { apps.launch(it) },
             onAllApps = { startActivity(Intent(this, AllAppsActivity::class.java)) },
             onSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+            onLock = { ScreenLock.lockOrAsk(this) },
         )
         row.addView(sidebar, LinearLayout.LayoutParams(Ui.dp(this, Sidebar.WIDTH_DP), ViewGroup.LayoutParams.MATCH_PARENT))
 
