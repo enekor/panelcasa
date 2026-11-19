@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -16,8 +18,26 @@ android {
         versionName = "0.1.0"
     }
 
+    // Firma de publicación, fuera del repositorio, en la carpeta de credenciales del contenedor.
+    // Las contraseñas y el alias salen de keystore.properties; la clave, siempre de la ruta del contenedor.
+    // Si falta algo, el APK de release sale sin firmar.
+    val signingProps = file("/root/credenciales/Android/keystore.properties")
+    val store = file("/root/credenciales/app-key.jks")
+    val releaseSigning = if (signingProps.isFile && store.isFile) {
+        val p = Properties().apply { signingProps.inputStream().use { load(it) } }
+        run {
+            signingConfigs.create("release") {
+                storeFile = store
+                storePassword = p.getProperty("storePassword")
+                keyAlias = p.getProperty("keyAlias")
+                keyPassword = p.getProperty("keyPassword")
+            }
+        } else null
+    } else null
+
     buildTypes {
         release {
+            signingConfig = releaseSigning
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
