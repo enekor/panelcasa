@@ -27,6 +27,7 @@ open class PanelApp : Application() {
             diagnostics = diagnostics,
         )
         engine.init()
+        diagnostics.startSampling()
     }
 
     /** Las pruebas lo sustituyen por un cliente sin red. */

@@ -47,31 +47,54 @@ class RenfeRepository(
     fun loadSchedule(): StationSchedule? = read(scheduleFile)
     fun hasZip(): Boolean = zipFile.isFile && zipFile.length() > 0
 
+    /** Fase de una operación larga, para mostrar el progreso. */
+    sealed class Progress {
+        /** [total] = -1 si el servidor no indica el tamaño. */
+        data class Downloading(val bytes: Long, val total: Long) : Progress()
+        object Processing : Progress()
+    }
+
+    /** La estación está elegida pero ya no aparece en el horario descargado. */
+    fun stationMissing(stationId: String?): Boolean {
+        if (stationId == null) return false
+        val index = loadIndex() ?: return false
+        return index.stations.none { it.id == stationId }
+    }
+
     /**
      * Comprueba si hay horario nuevo (petición condicional) y lo procesa.
      * [minCheckIntervalMs] evita volver a preguntar al servidor demasiado a menudo.
      */
     @Throws(IOException::class)
-    fun refreshStatic(stationId: String?, minCheckIntervalMs: Long = DAY_MS, force: Boolean = false): StaticOutcome {
+    fun refreshStatic(
+        stationId: String?,
+        minCheckIntervalMs: Long = DAY_MS,
+        force: Boolean = false,
+        onProgress: (Progress) -> Unit = {},
+    ): StaticOutcome {
         val meta = meta()
         val now = clock()
-        val missingLocal = !hasZip() || loadIndex() == null || (stationId != null && loadSchedule()?.station?.id != stationId)
+        val gone = stationMissing(stationId)
+        val missingLocal = !hasZip() || loadIndex() == null ||
+            (stationId != null && !gone && loadSchedule()?.station?.id != stationId)
         if (!force && !missingLocal && now - meta.checkedAt < minCheckIntervalMs) return StaticOutcome.SKIPPED
 
         val conditional = hasZip() && !force
         newZipFile.delete()
+        val progress: (Long, Long) -> Unit = { b, t -> onProgress(Progress.Downloading(b, t)) }
         val resp = if (conditional) {
-            fetcher.download(staticUrl, newZipFile, meta.etag, meta.lastModified)
+            fetcher.download(staticUrl, newZipFile, meta.etag, meta.lastModified, progress)
         } else {
-            fetcher.download(staticUrl, newZipFile)
+            fetcher.download(staticUrl, newZipFile, onProgress = progress)
         }
         return when {
             resp.ok -> {
                 val version = resp.lastModified ?: java.time.Instant.ofEpochMilli(now).toString()
                 // Se procesa el fichero nuevo antes de sustituir nada: si está corrupto, se conserva el anterior.
+                onProgress(Progress.Processing)
                 val start = System.nanoTime()
                 val result = try {
-                    scanner.scan(newZipFile, stationId, version)
+                    scanWithFallback(newZipFile, stationId, version)
                 } catch (e: Exception) {
                     newZipFile.delete()
                     write(metaFile, meta.copy(checkedAt = now))
@@ -93,20 +116,31 @@ class RenfeRepository(
             }
             resp.notModified -> {
                 write(metaFile, meta.copy(checkedAt = now))
-                if (missingLocal) rescan(stationId)
+                if (missingLocal) rescan(stationId, onProgress)
                 StaticOutcome.NOT_MODIFIED
             }
             else -> throw IOException("Horario de Renfe: HTTP ${resp.code}")
         }
     }
 
+    /**
+     * Si la estación elegida ya no está en el horario, se acepta igualmente el horario nuevo
+     * (sin horario de estación) para que la app pueda avisar y dejar elegir otra.
+     */
+    private fun scanWithFallback(zip: File, stationId: String?, version: String): GtfsScanner.Result = try {
+        scanner.scan(zip, stationId, version)
+    } catch (e: StationNotFoundException) {
+        scanner.scan(zip, null, version)
+    }
+
     /** Vuelve a procesar el GTFS guardado, sin red. Sirve para cambiar de estación. */
     @Throws(IOException::class)
-    fun rescan(stationId: String?): GtfsScanner.Result {
+    fun rescan(stationId: String?, onProgress: (Progress) -> Unit = {}): GtfsScanner.Result {
         if (!hasZip()) throw IOException("No hay horario descargado")
+        onProgress(Progress.Processing)
         val start = System.nanoTime()
         val meta = meta()
-        val result = scanner.scan(zipFile, stationId, meta.feedVersion)
+        val result = scanWithFallback(zipFile, stationId, meta.feedVersion)
         write(indexFile, result.index)
         if (result.schedule != null) write(scheduleFile, result.schedule) else scheduleFile.delete()
         write(metaFile, meta.copy(lastScanMs = (System.nanoTime() - start) / 1_000_000, lastScanAt = clock()))

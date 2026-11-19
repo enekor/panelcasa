@@ -98,7 +98,7 @@ class GtfsScanner(
             trips[r.str(h.getValue("trip_id"))] = (route shl 16) or svcIdx
         }
 
-        val station = stationId?.let { stopIndex[it] ?: throw IOException("La estación $it no existe en el GTFS") } ?: -1
+        val station = stationId?.let { stopIndex[it] ?: throw StationNotFoundException(it) } ?: -1
 
         // stop_times.txt
         val stopRoutes = arrayOfNulls<BitSet>(stopIds.size)
@@ -304,3 +304,7 @@ object LineComparator : Comparator<String> {
         return ma[3].compareTo(mb[3])
     }
 }
+
+/** La estación elegida no aparece en el horario (Renfe la ha quitado o ha cambiado su código). */
+class StationNotFoundException(val stationId: String) :
+    IOException("La estación $stationId no aparece en el horario de Renfe")

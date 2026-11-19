@@ -75,7 +75,7 @@ class MeteoRepositoryTest {
             ifModifiedSince.add(lastModified)
             return Fetcher.Response(code, if (code == 200) body else null, null, "Thu, 19 Nov 2026 16:02:13 GMT", "Thu, 19 Nov 2026 16:32:59 GMT")
         }
-        override fun download(url: String, dest: File, etag: String?, lastModified: String?) = throw UnsupportedOperationException()
+        override fun download(url: String, dest: File, etag: String?, lastModified: String?, onProgress: ((Long, Long) -> Unit)?) = throw UnsupportedOperationException()
     }
 
     private val t0 = Instant.parse("2026-11-19T16:03:00Z").toEpochMilli()

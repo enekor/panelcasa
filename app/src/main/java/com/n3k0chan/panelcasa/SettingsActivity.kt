@@ -52,6 +52,9 @@ class SettingsActivity : Activity() {
             st?.let { it.networks.joinToString(", ") + " · " + it.lines.joinToString(", ") + " · Toca para cambiar" } ?: "Toca para elegir",
         ) { startActivity(Intent(this, StationPickerActivity::class.java)) }
         c.addView(stationRow)
+        c.addView(Ui.text(this, app.engine.dataStatus(), 15f).apply {
+            setPadding(Ui.dp(this@SettingsActivity, 12), 0, Ui.dp(this@SettingsActivity, 12), 0)
+        })
 
         // Presentación
         c.addView(Ui.title(this, "Presentación de los trenes"))

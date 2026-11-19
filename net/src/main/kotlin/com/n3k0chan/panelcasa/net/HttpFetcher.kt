@@ -14,8 +14,15 @@ interface Fetcher {
     @Throws(IOException::class)
     fun get(url: String, etag: String? = null, lastModified: String? = null, maxBytes: Int = 4 * 1024 * 1024): Response
 
+    /** [onProgress] recibe bytes descargados y total (-1 si el servidor no lo indica). */
     @Throws(IOException::class)
-    fun download(url: String, dest: File, etag: String? = null, lastModified: String? = null): Response
+    fun download(
+        url: String,
+        dest: File,
+        etag: String? = null,
+        lastModified: String? = null,
+        onProgress: ((Long, Long) -> Unit)? = null,
+    ): Response
 
     class Response(
         val code: Int,
@@ -51,13 +58,38 @@ class HttpFetcher(
      * GET a fichero. Descarga a un temporal y solo sustituye [dest] si la descarga termina bien,
      * para no perder nunca el último fichero válido.
      */
-    override fun download(url: String, dest: File, etag: String?, lastModified: String?): Fetcher.Response {
+    override fun download(
+        url: String,
+        dest: File,
+        etag: String?,
+        lastModified: String?,
+        onProgress: ((Long, Long) -> Unit)?,
+    ): Fetcher.Response {
         val conn = open(url, etag, lastModified)
         try {
             val code = conn.responseCode
             if (code in 200..299) {
                 val tmp = File(dest.parentFile, dest.name + ".part")
-                conn.inputStream.use { input -> tmp.outputStream().use { input.copyTo(it, 64 * 1024) } }
+                val total = conn.contentLengthLong
+                conn.inputStream.use { input ->
+                    tmp.outputStream().use { out ->
+                        val buf = ByteArray(64 * 1024)
+                        var done = 0L
+                        var reported = 0L
+                        while (true) {
+                            val n = input.read(buf)
+                            if (n < 0) break
+                            out.write(buf, 0, n)
+                            done += n
+                            // Avisos cada 256 KB como mucho, para no saturar la interfaz.
+                            if (onProgress != null && done - reported >= 256 * 1024) {
+                                reported = done
+                                onProgress(done, total)
+                            }
+                        }
+                        onProgress?.invoke(done, total)
+                    }
+                }
                 if (dest.exists() && !dest.delete()) throw IOException("No se puede sustituir $dest")
                 if (!tmp.renameTo(dest)) throw IOException("No se puede renombrar $tmp")
             }

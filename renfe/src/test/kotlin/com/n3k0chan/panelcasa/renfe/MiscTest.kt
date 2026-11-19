@@ -80,12 +80,42 @@ class RenfeRepositoryTest {
         var downloads = 0
         var lastEtag: String? = null
         override fun get(url: String, etag: String?, lastModified: String?, maxBytes: Int) = throw IOException("sin red")
-        override fun download(url: String, dest: File, etag: String?, lastModified: String?): Fetcher.Response {
+        override fun download(url: String, dest: File, etag: String?, lastModified: String?, onProgress: ((Long, Long) -> Unit)?): Fetcher.Response {
             downloads++
             lastEtag = etag
-            if (code == 200) source!!.copyTo(dest, overwrite = true)
+            if (code == 200) {
+                source!!.copyTo(dest, overwrite = true)
+                onProgress?.invoke(dest.length(), dest.length())
+            }
             return Fetcher.Response(code, null, "\"e$downloads\"", "Thu, 19 Nov 2026 04:09:00 GMT", null)
         }
+    }
+
+    @Test
+    fun reportsDownloadThenProcessing() {
+        val fetcher = FakeFetcher(GtfsFixture.write(tmp.newFolder()))
+        val repo = RenfeRepository(tmp.newFolder("data"), fetcher)
+        val phases = ArrayList<RenfeRepository.Progress>()
+        repo.refreshStatic("S", onProgress = { phases.add(it) })
+        assertTrue(phases.first() is RenfeRepository.Progress.Downloading)
+        assertEquals(RenfeRepository.Progress.Processing, phases.last())
+    }
+
+    @Test
+    fun stationRemovedFromScheduleIsAcceptedAndReportedWithoutRedownloading() {
+        // Horario nuevo sin la parada «S»: se acepta, no hay horario de estación y no se descarga en bucle.
+        val stops = GtfsFixture.files.getValue("stops.txt").trimIndent().lines().filterNot { it.startsWith("S,") }.joinToString("\n")
+        val times = GtfsFixture.files.getValue("stop_times.txt").trimIndent().lines().filterNot { it.contains(",S,") }.joinToString("\n")
+        val zip = GtfsFixture.write(tmp.newFolder(), overrides = mapOf("stops.txt" to stops, "stop_times.txt" to times))
+        val fetcher = FakeFetcher(zip)
+        val repo = RenfeRepository(tmp.newFolder("data"), fetcher)
+        assertEquals(RenfeRepository.StaticOutcome.UPDATED, repo.refreshStatic("S"))
+        assertNotNull(repo.loadIndex())
+        assertEquals(null, repo.loadSchedule())
+        assertTrue(repo.stationMissing("S"))
+        assertFalse(repo.stationMissing("H"))
+        assertEquals(RenfeRepository.StaticOutcome.SKIPPED, repo.refreshStatic("S"))
+        assertEquals(1, fetcher.downloads)
     }
 
     @Test

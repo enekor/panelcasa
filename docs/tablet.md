@@ -19,10 +19,12 @@ Pasos manuales en la ASUS ZenPad 10 (Android 7.0). Los nombres de menú pueden v
 3. En Windows (PowerShell):
 
    ```powershell
-   docker exec 3b42393586e1 sh -c "cd /root/panelcasa && ./gradlew :app:assembleDebug"
-   docker cp 3b42393586e1:/root/panelcasa/app/build/outputs/apk/debug/app-debug.apk $env:TEMP\panelcasa-debug.apk
-   adb install -r $env:TEMP\panelcasa-debug.apk
+   docker exec 3b42393586e1 sh -c "cd /root/panelcasa && ./gradlew :app:assembleRelease"
+   docker cp 3b42393586e1:/root/panelcasa/app/build/outputs/apk/release/app-release.apk $env:TEMP\panelcasa-release.apk
+   adb install -r $env:TEMP\panelcasa-release.apk
    ```
+
+   El APK de publicación se firma con `/root/credenciales/app-key.jks`. El de depuración (`assembleDebug`) lleva otra firma: para cambiar de uno a otro hay que desinstalar antes.
 
 ### Sin adb
 
@@ -53,7 +55,9 @@ Pasos manuales en la ASUS ZenPad 10 (Android 7.0). Los nombres de menú pueden v
 
 ### Sin cable
 
-Rueda dentada → Diagnóstico → «Exportar informe». El fichero queda en `Android/data/com.n3k0chan.panelcasa/files/` y se puede copiar por USB como cualquier fichero.
+Rueda dentada → Diagnóstico → **«Compartir informe»** (WhatsApp, correo…). El informe incluye memoria al inicio, máxima y cada hora, CPU media, tiempos de arranque y de procesado, versión y capacidades del WebView y los últimos sucesos.
+
+También se puede usar «Exportar informe»: el fichero queda en `Android/data/com.n3k0chan.panelcasa/files/` y se copia por USB.
 
 ### Con adb
 

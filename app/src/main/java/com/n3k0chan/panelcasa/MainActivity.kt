@@ -166,6 +166,7 @@ class MainActivity : Activity() {
             pageReady = true
             errorView.visibility = View.GONE
             push(app.engine.panel.value)
+            if (app.diagnostics.webFeatures == "?") view.evaluateJavascript(FEATURES_JS) { app.diagnostics.webFeatures = it.trim('"') }
         }
 
         // El panel no navega a ningún sitio.
@@ -291,5 +292,15 @@ class MainActivity : Activity() {
 
     companion object {
         const val PANEL_URL = "file:///android_asset/panel/index.html"
+
+        /** Prueba del motor web (fase 0): lo que necesita el panel, medido dentro del propio WebView. */
+        private const val FEATURES_JS = """(function(){
+            function ok(b){return b?'sí':'NO';}
+            var asyncOk=false; try{ new Function('return (async function(){})')(); asyncOk=true; }catch(e){}
+            var gridOk=!!(window.CSS&&CSS.supports&&CSS.supports('display','grid'));
+            var clampOk=!!(window.CSS&&CSS.supports&&CSS.supports('-webkit-line-clamp','2'));
+            return 'CSS Grid '+ok(gridOk)+' · fetch '+ok(typeof fetch==='function')+' · Promise '+ok(typeof Promise==='function')+
+              ' · async/await '+ok(asyncOk)+' · line-clamp '+ok(clampOk)+' · '+window.innerWidth+'x'+window.innerHeight+' px css, x'+window.devicePixelRatio;
+        })()"""
     }
 }

@@ -80,17 +80,29 @@ class DataEngine(
             schedule = withContext(Dispatchers.IO) { renfe.loadSchedule() }
             if (schedule != null && schedule?.station?.id != prefs.stationId) schedule = null
             publish()
+            // El horario se comprueba siempre, también con otra app delante: es una consulta diaria y,
+            // si se cortara a medias, la descarga en curso seguiría y se solaparía con la siguiente.
+            staticLoop()
         }
     }
 
     val hasStation: Boolean get() = prefs.stationId != null
     val currentStation get() = schedule?.station
 
+    /** Resumen para la pantalla de ajustes. */
+    fun dataStatus(): String {
+        val fmt = java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale("es", "ES"))
+        fun at(t: Long) = if (t <= 0) "todavía no" else fmt.format(java.util.Date(t))
+        val meta = renfe.meta()
+        val version = meta.lastModified?.let { MeteoRepository.parseHttpDate(it) }?.let { fmt.format(java.util.Date(it)) } ?: "sin descargar"
+        return "Horario de Renfe del $version (comprobado ${at(meta.checkedAt)})\n" +
+            "Tiempo real: ${at(realtimeOkAt)} · Meteo: ${at(meteoOkAt)}"
+    }
+
     fun onForeground() {
         if (loops?.isActive == true) return
         diagnostics.event("Panel en primer plano: refresco inmediato")
         loops = scope.launch {
-            launch { staticLoop() }
             launch { realtimeLoop() }
             launch { alertsLoop() }
             launch { meteoLoop() }
@@ -110,11 +122,16 @@ class DataEngine(
     // ---------- ciclos ----------
 
     private suspend fun staticLoop() {
+        var failures = 0
         while (true) {
             val stale = schedule?.let { s -> BoardBuilder.upcoming(s, Instant.ofEpochMilli(clock()), null, 24 * 3600).isEmpty() } ?: true
             // Comprobación diaria; si el horario está caducado o falta, cada hora.
-            refreshStatic(if (stale) HOUR_MS else RenfeRepository.DAY_MS)
-            delay(HOUR_MS)
+            val ok = refreshStatic(if (stale) HOUR_MS else RenfeRepository.DAY_MS)
+            failures = if (ok) 0 else failures + 1
+            // Sin ningún dato todavía: reintento rápido (30 s, 1 min, 2 min… hasta 1 h).
+            val noData = withContext(Dispatchers.IO) { renfe.loadIndex() == null }
+            val wait = if (noData && !ok) minOf(30_000L shl minOf(failures - 1, 7), HOUR_MS) else HOUR_MS
+            delay(wait)
         }
     }
 
@@ -165,47 +182,74 @@ class DataEngine(
 
     // ---------- operaciones ----------
 
-    private suspend fun refreshStatic(minIntervalMs: Long) {
+    /** Texto de progreso para el buscador y el panel. Se llama desde el hilo de la descarga. */
+    private fun progressText(stationName: String?): (RenfeRepository.Progress) -> Unit = { p ->
+        _busy.value = when (p) {
+            is RenfeRepository.Progress.Downloading -> if (p.total > 0) {
+                "Descargando el horario de Renfe: ${mb(p.bytes)} de ${mb(p.total)} MB…"
+            } else {
+                "Descargando el horario de Renfe: ${mb(p.bytes)} MB…"
+            }
+            RenfeRepository.Progress.Processing -> if (stationName != null) {
+                "Procesando el horario de $stationName…"
+            } else {
+                "Procesando el horario de Renfe (puede tardar un poco)…"
+            }
+        }
+    }
+
+    private fun mb(bytes: Long) = String.format(java.util.Locale("es", "ES"), "%.1f", bytes / 1_048_576.0)
+
+    /** Devuelve true si terminó bien (aunque no hubiera nada nuevo). */
+    private suspend fun refreshStatic(minIntervalMs: Long): Boolean {
         val station = prefs.stationId
+        var ok = false
+        // Si ya hay una descarga en curso, se espera a que termine en vez de empezar otra.
         staticMutex.withLock {
-            val needsDownload = !renfe.hasZip()
-            if (needsDownload) _busy.value = "Descargando el horario de Renfe…"
             try {
-                val outcome = measuredScan { renfe.refreshStatic(station, minIntervalMs) }
+                val outcome = measuredScan { renfe.refreshStatic(station, minIntervalMs, onProgress = progressText(null)) }
                 diagnostics.staticCheckedAt = renfe.meta().checkedAt
                 if (outcome != RenfeRepository.StaticOutcome.SKIPPED) {
                     diagnostics.event("Horario de Renfe: $outcome (${renfe.meta().feedVersion})")
                 }
                 schedule = withContext(Dispatchers.IO) { renfe.loadSchedule() }?.takeIf { it.station.id == station }
-                renfeMessage = null
+                renfeMessage = if (withContext(Dispatchers.IO) { renfe.stationMissing(station) }) {
+                    "La estación elegida ya no aparece en el horario de Renfe. Elige otra en ajustes."
+                } else {
+                    null
+                }
+                ok = true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 diagnostics.error("horario de Renfe", e)
-                if (schedule == null) renfeMessage = "No se pudo descargar el horario de Renfe. Se reintentará en una hora."
+                if (schedule == null) renfeMessage = "No se pudo descargar el horario de Renfe. Reintentando…"
             } finally {
                 _busy.value = null
             }
         }
         publish()
+        return ok
     }
 
-    /** Índice de estaciones para el buscador; lo descarga si hace falta. */
+    /** Índice de estaciones para el buscador; lo descarga si hace falta o espera a la descarga en curso. */
     suspend fun ensureIndex(): StationIndex? {
         withContext(Dispatchers.IO) { renfe.loadIndex() }?.let { return it }
-        refreshStatic(0)
+        // Intervalo máximo: solo descarga si falta algo en local.
+        refreshStatic(Long.MAX_VALUE)
         return withContext(Dispatchers.IO) { renfe.loadIndex() }
     }
 
     /** Cambia de estación reprocesando el horario guardado, sin descargar nada si ya lo hay. */
-    fun changeStation(id: String, onDone: (Boolean) -> Unit) {
+    fun changeStation(id: String, name: String, onDone: (Boolean) -> Unit) {
         scope.launch {
             var ok = false
             staticMutex.withLock {
-                _busy.value = "Procesando el horario de la estación…"
+                val progress = progressText(name)
+                progress(RenfeRepository.Progress.Processing)
                 try {
                     measuredScan {
-                        if (renfe.hasZip()) renfe.rescan(id) else renfe.refreshStatic(id, force = true)
+                        if (renfe.hasZip()) renfe.rescan(id, progress) else renfe.refreshStatic(id, force = true, onProgress = progress)
                     }
                     prefs.stationId = id
                     schedule = withContext(Dispatchers.IO) { renfe.loadSchedule() }

@@ -8,6 +8,6 @@ import java.io.IOException
 class TestApp : PanelApp() {
     override fun createFetcher(): Fetcher = object : Fetcher {
         override fun get(url: String, etag: String?, lastModified: String?, maxBytes: Int): Fetcher.Response = throw IOException("sin red en pruebas")
-        override fun download(url: String, dest: File, etag: String?, lastModified: String?): Fetcher.Response = throw IOException("sin red en pruebas")
+        override fun download(url: String, dest: File, etag: String?, lastModified: String?, onProgress: ((Long, Long) -> Unit)?): Fetcher.Response = throw IOException("sin red en pruebas")
     }
 }

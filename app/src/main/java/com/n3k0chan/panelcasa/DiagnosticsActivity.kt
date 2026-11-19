@@ -1,6 +1,8 @@
 package com.n3k0chan.panelcasa
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.widget.LinearLayout
@@ -20,6 +22,7 @@ class DiagnosticsActivity : Activity() {
         val buttons = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             addView(Ui.button(this@DiagnosticsActivity, "Actualizar") { refresh() })
+            addView(Ui.button(this@DiagnosticsActivity, "Compartir informe") { share() })
             addView(Ui.button(this@DiagnosticsActivity, "Exportar informe") {
                 val f = runCatching { app.diagnostics.export() }.getOrNull()
                 Toast.makeText(
@@ -39,5 +42,21 @@ class DiagnosticsActivity : Activity() {
 
     private fun refresh() {
         body.text = app.diagnostics.report()
+    }
+
+    /** Menú de compartir de Android (WhatsApp, correo…): el informe va como texto, sin ficheros ni permisos. */
+    private fun share() {
+        val report = app.diagnostics.report()
+        body.text = report
+        val send = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_SUBJECT, "Panel de casa: informe de diagnóstico")
+            .putExtra(Intent.EXTRA_TEXT, report)
+        try {
+            startActivity(Intent.createChooser(send, "Compartir informe"))
+            app.diagnostics.event("Informe compartido")
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No hay ninguna app para compartir. Usa «Exportar informe».", Toast.LENGTH_LONG).show()
+        }
     }
 }

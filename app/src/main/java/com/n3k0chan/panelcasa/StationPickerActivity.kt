@@ -63,7 +63,7 @@ class StationPickerActivity : Activity() {
 
         scope.launch { app.engine.busy.collect { if (it != null) status.text = it } }
         scope.launch {
-            status.text = "Cargando la lista de estaciones…"
+            status.text = app.engine.busy.value ?: "Cargando la lista de estaciones…"
             val index = app.engine.ensureIndex()
             if (index == null) {
                 status.text = "No se pudo descargar el horario de Renfe. Comprueba la conexión y vuelve a entrar."
@@ -88,7 +88,7 @@ class StationPickerActivity : Activity() {
         choosing = true
         input.isEnabled = false
         status.text = "Procesando el horario de ${station.name}…"
-        app.engine.changeStation(station.id) { ok ->
+        app.engine.changeStation(station.id, station.name) { ok ->
             choosing = false
             if (ok) {
                 finish()

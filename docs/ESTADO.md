@@ -9,8 +9,21 @@
 | 2 — Meteo | Hecha |
 | 3 — Panel web | Hecha. Pendiente: confirmación visual en la tablet |
 | 4 — App launcher | Hecha en el contenedor. Pendiente: verificación en la tablet |
-| 5 — Google Home | Bloqueada: falta dispositivo con Android 10+, inventario y visto bueno para registrar el proyecto en Google |
+| 5 — Google Home | Aplazada por decisión de Eneko. La columna está oculta en todas las versiones (`VersionGate.HOME_MODULE_READY = false`) |
 | 6 — Robustez y entrega | Pendiente: necesita la tablet |
+
+## Cambios tras la primera prueba en un móvil (19/11/2026)
+
+- **Descarga doble del horario corregida.** Al abrir el buscador encima del panel se pausaban los ciclos y la descarga en curso se abandonaba a medias mientras el buscador lanzaba otra sobre el mismo fichero temporal. Ahora la comprobación del horario no se pausa nunca (solo tiempo real, avisos y meteo) y el buscador espera a la descarga en curso.
+- **Progreso visible:** «Descargando el horario de Renfe: 6,2 de 15,0 MB…» y «Procesando el horario…», en el buscador y en el panel.
+- **Reintento rápido sin datos:** si todavía no hay horario, reintenta a los 30 s, 1 min, 2 min… hasta 1 h.
+- **Estación retirada por Renfe:** el horario nuevo se acepta igualmente y el panel pide elegir otra estación, en lugar de descartar cada día el horario nuevo.
+- **Ajustes muestra el estado de los datos:** versión del horario, última comprobación, último tiempo real y última meteo.
+- **Diagnóstico:**
+  - Botón «Compartir informe» con el menú de compartir de Android.
+  - Prueba del motor web medida dentro del WebView (CSS Grid, fetch, async/await, line-clamp, tamaño de pantalla en px CSS).
+  - Memoria al inicio, máxima y cada hora, y CPU media (total y últimos 10 min), para la prueba de 24 horas sin adb.
+- **APK de publicación firmado** con `/root/credenciales/app-key.jks` (SHA-256 `DF:71:94:E4:…:04:43`). R8 conserva los 18 serializadores (comprobado en `mapping.txt`) y el APK funcionó en un móvil con Android 17.
 
 ## Fase 0 — Reconocimiento
 
@@ -89,15 +102,13 @@ Abierto (necesita la tablet):
 - Comportamiento del gestor de inicio automático de ZenUI.
 - Aspecto real, legibilidad a distancia y tamaño táctil de los iconos.
 - Memoria, CPU y tiempo de procesado del horario.
-- Firma del APK de publicación: hace falta crear una clave (fuera de git). Mientras tanto se usa el APK de depuración.
 
 ## Fase 5 — Google Home
 
-Bloqueada. Para empezar hacen falta:
+Aplazada por decisión de Eneko (19/11/2026). La columna de casa no se crea en ninguna versión de Android mientras `VersionGate.HOME_MODULE_READY` sea `false`; la regla de Android 10 sigue debajo, probada. Ya hay dispositivo de pruebas (móvil con Android 17). Para retomarla hacen falta:
 
-1. Un móvil o tablet con Android 10 o posterior y la cuenta de Google de Eneko.
-2. El inventario de dispositivos (marca, modelo, habitación, cuáles van al panel, si hay Nest Hub o similar).
-3. El visto bueno explícito de Eneko para registrar el proyecto en la consola de Google Home y crear el cliente OAuth.
+1. El inventario de dispositivos (marca, modelo, habitación, cuáles van al panel, si hay Nest Hub o similar).
+2. El visto bueno explícito de Eneko para registrar el proyecto en la consola de Google Home y crear el cliente OAuth.
 
 La puerta de versión y la columna de pruebas ya están, así que el módulo se conectará en `HomeColumn`.
 
