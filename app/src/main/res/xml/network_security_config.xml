@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 7.0 no trae algunas raíces actuales. Se añaden como anclas de confianza ADICIONALES a las del sistema:
+  - HARICA TLS RSA/ECC Root CA 2021: api.met.no (comprobado: falla sin ella con el almacén de Android 7.0).
+  - ISRG Root X1/X2 (Let's Encrypt): por si Renfe o Met.no pasan a certificados de Let's Encrypt.
+  La validación de cadena, nombre y caducidad sigue completa. Sin tráfico en claro y sin excepciones por host.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/harica_tls_rsa_root_2021" />
+            <certificates src="@raw/harica_tls_ecc_root_2021" />
+            <certificates src="@raw/isrg_root_x1" />
+            <certificates src="@raw/isrg_root_x2" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

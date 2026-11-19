@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher: fondo oscuro desde el primer fotograma, sin barra de título ni animaciones. -->
+    <style name="Theme.Panel.Launcher" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@color/panel_bg</item>
+        <item name="android:colorBackground">@color/panel_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:statusBarColor">@color/panel_bg</item>
+        <item name="android:navigationBarColor">@color/panel_bg</item>
+    </style>
+
+    <!-- Pantallas de ajustes: tema oscuro estándar del sistema, legible y sin dependencias. -->
+    <style name="Theme.Panel.Settings" parent="android:Theme.Material">
+        <item name="android:colorPrimary">@color/sidebar_bg</item>
+        <item name="android:colorPrimaryDark">@color/panel_bg</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/settings_bg</item>
+    </style>
+</resources>

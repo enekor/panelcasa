@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="panel_bg">#FF0F1317</color>
+    <color name="sidebar_bg">#FF0B0E11</color>
+    <color name="settings_bg">#FF141A1F</color>
+    <color name="text_main">#FFE8ECEF</color>
+    <color name="text_dim">#FFA9B4BD</color>
+    <color name="accent">#FF57C785</color>
+    <color name="divider">#FF232B32</color>
+</resources>

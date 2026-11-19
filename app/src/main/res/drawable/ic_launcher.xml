@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono propio: fondo oscuro con un tren esquemático y un sol. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path android:fillColor="#FF141A1F" android:pathData="M8,2h32a6,6 0 0 1 6,6v32a6,6 0 0 1 -6,6h-32a6,6 0 0 1 -6,-6v-32a6,6 0 0 1 6,-6z" />
+    <path android:fillColor="#FFFFC83D" android:pathData="M34,14m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0" />
+    <path android:fillColor="#FFE8ECEF" android:pathData="M12,18h16a4,4 0 0 1 4,4v12a4,4 0 0 1 -4,4h-16a4,4 0 0 1 -4,-4v-12a4,4 0 0 1 4,-4z" />
+    <path android:fillColor="#FF2A6FDB" android:pathData="M12,22h16v6h-16z" />
+    <path android:fillColor="#FF141A1F" android:pathData="M14,33m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0M26,33m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0" />
+    <path android:fillColor="#FFA9B4BD" android:pathData="M10,40h20v2h-20z" />
+</vector>

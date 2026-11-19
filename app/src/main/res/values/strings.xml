@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Panel de casa</string>
+    <string name="settings">Ajustes</string>
+    <string name="choose_station">Elegir estación</string>
+    <string name="pinned_apps">Apps del panel lateral</string>
+    <string name="all_apps">Todas las apps</string>
+    <string name="diagnostics">Diagnóstico</string>
+    <string name="all_apps_short">Todas</string>
+    <string name="search_hint">Escribe el nombre de la estación</string>
+</resources>
