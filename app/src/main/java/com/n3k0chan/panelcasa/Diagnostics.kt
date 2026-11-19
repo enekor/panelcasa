@@ -59,7 +59,7 @@ class Diagnostics(private val context: Context) {
             appendLine("Panel de casa — diagnóstico ${fmt.format(Date())}")
             appendLine("Dispositivo: ${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             appendLine("WebView: $webViewVersion")
-            appendLine("Columna de Google Home: ${if (VersionGate.homeEnabled()) "activa" else "ausente (Android < 10)"}")
+            appendLine("Columna de Google Home: ${when { VersionGate.homeColumnVisible() -> "activa"; !VersionGate.homeEnabled() -> "ausente (Android < 10)"; else -> "oculta (integración aplazada)" }}")
             appendLine()
             appendLine("Memoria de la app (PSS total): ${mem.totalPss / 1024} MB")
             appendLine("Heap Java: ${(rt.totalMemory() - rt.freeMemory()) / 1_048_576} MB usados de ${rt.maxMemory() / 1_048_576} MB")

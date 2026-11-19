@@ -49,15 +49,15 @@ class VersionGateLayoutTest {
 
     @Test
     @Config(sdk = [29])
-    fun android10HasHomeColumnWithOneThird() {
+    fun android10HidesHomeColumnWhileIntegrationIsPostponed() {
         val a = launch()
         val root = a.window.decorView
-        val home = root.findViewWithTag<View>(HomeColumn.TAG)
-        assertNotNull(home)
+        // La integración con Google Home está aplazada: tampoco hay columna en Android 10+.
+        assertFalse(VersionGate.HOME_MODULE_READY)
+        assertNull(root.findViewWithTag<View>(HomeColumn.TAG))
         val web = root.findViewWithTag<View>("web-container")
-        assertEquals(1f, (home.layoutParams as LinearLayout.LayoutParams).weight)
-        assertEquals(2f, (web.layoutParams as LinearLayout.LayoutParams).weight)
-        assertTrue(VersionGate.homeEnabled())
+        assertEquals(1f, (web.layoutParams as LinearLayout.LayoutParams).weight)
+        assertTrue("La puerta de versión sigue permitiéndola en API 29", VersionGate.homeEnabled())
     }
 
     @Test

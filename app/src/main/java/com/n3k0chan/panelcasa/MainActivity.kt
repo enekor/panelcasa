@@ -75,7 +75,7 @@ class MainActivity : Activity() {
         )
         row.addView(sidebar, LinearLayout.LayoutParams(Ui.dp(this, Sidebar.WIDTH_DP), ViewGroup.LayoutParams.MATCH_PARENT))
 
-        val homeEnabled = VersionGate.homeEnabled()
+        val homeEnabled = VersionGate.homeColumnVisible()
         if (homeEnabled) {
             // Solo aquí se crea la columna de casa: por debajo de Android 10 no existe ni deja hueco.
             row.addView(HomeColumn(this), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))

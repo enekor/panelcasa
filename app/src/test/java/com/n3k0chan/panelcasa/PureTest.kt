@@ -52,6 +52,14 @@ class VersionGateTest {
         assertTrue(VersionGate.homeEnabled(29))
         assertTrue(VersionGate.homeEnabled(35))
     }
+
+    @Test
+    fun columnNeedsBothVersionAndModule() {
+        assertFalse(VersionGate.homeColumnVisible(35, moduleReady = false))
+        assertFalse(VersionGate.homeColumnVisible(24, moduleReady = true))
+        assertFalse(VersionGate.homeColumnVisible(28, moduleReady = true))
+        assertTrue(VersionGate.homeColumnVisible(29, moduleReady = true))
+    }
 }
 
 /**
