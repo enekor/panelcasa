@@ -26,7 +26,6 @@ class Diagnostics(private val context: Context) {
     @Volatile var lastScanPeakHeapMb: Long = -1
     @Volatile var lastScanAt: Long = 0
     @Volatile var realtimeOkAt: Long = 0
-    @Volatile var realtimeBytes: Int = 0
     @Volatile var meteoOkAt: Long = 0
     @Volatile var staticCheckedAt: Long = 0
     @Volatile var webViewVersion: String = "?"
@@ -71,7 +70,7 @@ class Diagnostics(private val context: Context) {
             appendLine("Arranque: panel visible a los ${if (firstPanelSinceBootMs < 0) "?" else (firstPanelSinceBootMs / 1000).toString()} s del encendido; ${firstPanelSinceProcessMs} ms desde el inicio de la app")
             appendLine("Último procesado del horario: ${if (lastScanMs < 0) "?" else "$lastScanMs ms"}, pico de heap ${if (lastScanPeakHeapMb < 0) "?" else "$lastScanPeakHeapMb MB"} (${ago(lastScanAt)})")
             appendLine("Última comprobación del horario: ${ago(staticCheckedAt)}")
-            appendLine("Último tiempo real de Renfe: ${ago(realtimeOkAt)} (${realtimeBytes / 1024} KB)")
+            appendLine("Último tiempo real de Renfe: ${ago(realtimeOkAt)}")
             appendLine("Última meteo: ${ago(meteoOkAt)}")
             appendLine()
             appendLine("Sucesos recientes:")

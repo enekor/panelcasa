@@ -127,8 +127,8 @@ class DataEngine(
                     realtimeOkAt = clock()
                     diagnostics.realtimeOkAt = realtimeOkAt
                 } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
+                    throw e
+                } catch (e: Exception) {
                     diagnostics.error("tiempo real de Renfe", e)
                 }
             }
@@ -145,8 +145,8 @@ class DataEngine(
                     alertsAt = clock()
                     publish()
                 } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
+                    throw e
+                } catch (e: Exception) {
                     diagnostics.error("avisos de Renfe", e)
                     // Avisos de hace más de 30 min ya no se muestran.
                     if (clock() - alertsAt > 30 * 60_000L) alerts = emptyList()
@@ -214,8 +214,8 @@ class DataEngine(
                     ok = schedule?.station?.id == id
                     diagnostics.event("Estación elegida: ${schedule?.station?.name} ($id)")
                 } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
+                    throw e
+                } catch (e: Exception) {
                     diagnostics.error("cambio de estación", e)
                 } finally {
                     _busy.value = null
@@ -249,8 +249,8 @@ class DataEngine(
             }
             meteoMessage = null
         } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
+            throw e
+        } catch (e: Exception) {
             diagnostics.error("meteo", e)
         }
         publish()
