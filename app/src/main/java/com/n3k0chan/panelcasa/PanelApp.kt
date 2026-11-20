@@ -5,11 +5,10 @@ import com.n3k0chan.panelcasa.meteo.MeteoRepository
 import com.n3k0chan.panelcasa.net.BundledRootsTrustManager
 import com.n3k0chan.panelcasa.net.Fetcher
 import com.n3k0chan.panelcasa.net.HttpFetcher
+import com.n3k0chan.panelcasa.net.Pem
 import com.n3k0chan.panelcasa.renfe.RenfeRepository
 import java.io.File
 import java.security.KeyStore
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
@@ -48,8 +47,8 @@ open class PanelApp : Application() {
         val primary = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
             .apply { init(null as KeyStore?) }
             .trustManagers.filterIsInstance<X509TrustManager>().first()
-        val cf = CertificateFactory.getInstance("X.509")
-        val roots = BUNDLED_ROOTS.map { id -> resources.openRawResource(id).use { cf.generateCertificate(it) as X509Certificate } }
+        val roots = BUNDLED_ROOTS.flatMap { id -> Pem.certificates(resources.openRawResource(id).use { String(it.readBytes(), Charsets.US_ASCII) }) }
+        diagnostics.event("TLS: ${roots.size} raíces empaquetadas cargadas")
         val reported = java.util.Collections.synchronizedSet(HashSet<String>())
         val tm = BundledRootsTrustManager(primary, roots, onFallback = { msg ->
             // Una sola vez por servidor y arranque, para no llenar el registro cada minuto.

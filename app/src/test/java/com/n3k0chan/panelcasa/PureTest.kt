@@ -108,3 +108,22 @@ class PanelContractTest {
         assertEquals(true, js.contains("window.panel"))
     }
 }
+
+/**
+ * Android 7.0 no lee certificados con texto alrededor del bloque PEM (WRONG_TAG), ni en la app ni en
+ * network_security_config. Cada raíz empaquetada debe ser exactamente un bloque PEM y nada más.
+ */
+class BundledRootsFormatTest {
+    @Test
+    fun everyBundledRootIsAPlainSinglePemBlock() {
+        val files = File("src/main/res/raw").listFiles { f -> f.name.endsWith(".pem") }!!
+        assertEquals(4, files.size)
+        for (f in files) {
+            val text = f.readText().trim()
+            assertTrue("${f.name} debe empezar por BEGIN", text.startsWith("-----BEGIN CERTIFICATE-----"))
+            assertTrue("${f.name} debe terminar en END", text.endsWith("-----END CERTIFICATE-----"))
+            assertEquals("${f.name}: un solo certificado", 1, Regex("BEGIN CERTIFICATE").findAll(text).count())
+            assertFalse("${f.name}: sin retornos de carro", text.contains('\r'))
+        }
+    }
+}

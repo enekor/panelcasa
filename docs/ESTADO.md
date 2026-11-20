@@ -28,6 +28,7 @@
 ## Cambios tras la primera prueba en la tablet (20/11/2026)
 
 - **Met.no fallaba en la tablet** con «Trust anchor for certification path not found»: Android 7.0 no corta la cadena firmada en cruzado en la raíz HARICA 2021 empaquetada. Arreglado con `BundledRootsTrustManager` (validación PKIX de respaldo solo contra las raíces empaquetadas; ver `docs/entorno.md`). 7 pruebas con la cadena real y prueba en vivo (`./gradlew :net:liveTls`) que reproduce el fallo y su solución.
+- **Segunda prueba:** el refuerzo no llegó a activarse porque Android 7.0 no podía leer los ficheros de HARICA (texto antes del bloque PEM → `WRONG_TAG`). Probable causa también del fallo original. Ficheros limpiados, lector PEM tolerante y prueba de formato. El diagnóstico muestra ahora «TLS: 4 raíces empaquetadas cargadas».
 - **Botón de bloqueo** (candado) en el panel lateral: administrador del dispositivo con una sola política (`force-lock`); se activa la primera vez que se pulsa y se puede retirar desde ajustes. No añade ningún `uses-permission`.
 
 ## Fase 0 — Reconocimiento
